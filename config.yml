@@ -1,0 +1,33 @@
+mqtt:
+  username: ""
+  password: ""
+  host: "192.168.0.1"
+  port: 1883
+
+interval: 20
+
+display:
+  - id: 0  # First monitor
+    inputs:
+      HDMI: 17
+      DisplayPort: 15
+    gamer_modes:
+      Off: 0
+      FPS: 11
+      RTS: 12
+      Racing: 13
+      Gamer 1: 14
+      Gamer 2: 15
+      Gamer 3: 16
+  - id: 1  # Second monitor
+    inputs:
+      HDMI: 17
+      DisplayPort: 15
+    gamer_modes:
+      Off: 0
+      FPS: 11
+      RTS: 12
+      Racing: 13
+      Gamer 1: 14
+      Gamer 2: 15
+      Gamer 3: 16
