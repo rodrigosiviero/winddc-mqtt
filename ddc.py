@@ -34,7 +34,7 @@ def get_physical_monitors():
         return True
     
     if not windll.user32.EnumDisplayMonitors(None, None, _MONITORENUMPROC(callback), None):
-        raise WinError('EnumDisplayMonitors failed')
+        raise WinError()
     
     result = []
     for monitor in monitors:

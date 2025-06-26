@@ -1,8 +1,10 @@
 import paho.mqtt.client as mqtt
 import json
 from timer import Timer
+from typing import Any
 
 class MQTTClient:
+    delegate: Any = None
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code " + str(rc))
 
@@ -25,7 +27,6 @@ class MQTTClient:
         self.client.on_message = self.on_message
         self.client.on_disconnect = self.on_disconnect
         self.client.connect(host, port, 60)
-        self.delegate = None
         self.timer = Timer(60, self)
         self.timer.active = False
 

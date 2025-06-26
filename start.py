@@ -29,8 +29,7 @@ class Service:
                             config["mqtt"]["port"])
         
         poll_interval = 20 if "interval" not in config else config["interval"]
-        
-        self.mqtt.delegate = self
+        self.mqtt.delegate = self  # type: ignore
         
         self.inputs = {}
         self.gamer_modes = {}
@@ -74,7 +73,7 @@ class Service:
                     # Add more mappings as needed
                 }
                 
-                current_input_name = input_map.get(input_code, "Unknown")
+                current_input_name = input_map[input_code] if input_code in input_map else "Unknown"
                 
                 # Update the state in Home Assistant
                 self.mqtt.client.publish(self.inputs[display_id]["select"]["topic"], current_input_name, retain=True)
@@ -101,7 +100,7 @@ class Service:
                     GAMER_MODE_GAMER3: "Gamer 3"
                 }
                 
-                current_mode_name = mode_map.get(current_mode_code, "OFF")
+                current_mode_name = mode_map[current_mode_code] if current_mode_code in mode_map else "OFF"
                 
                 # Update the state in Home Assistant
                 self.mqtt.client.publish(self.gamer_modes[display_id]["select"]["topic"], current_mode_name, retain=True)
@@ -351,6 +350,7 @@ class Service:
             self.step(self.dt)
             t1 = timer()
             self.dt = t1 - t0
+            import time; time.sleep(0.1) 
 
 service = Service()
 service.start()
