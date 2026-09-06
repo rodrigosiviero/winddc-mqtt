@@ -1,4 +1,4 @@
 @echo off
-cd /d C:\Users\rodri\winddc-mqtt
+cd /d "%~dp0"
 call .venv\Scripts\activate.bat
-python start.py > winddc.log 2>&1 
+python start.py

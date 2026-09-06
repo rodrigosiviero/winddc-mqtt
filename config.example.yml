@@ -1,0 +1,34 @@
+mqtt:
+  host: "192.168.1.10"
+  port: 1883
+  username: ""
+  password: ""
+
+# Seconds between DDC/CI state reads.
+interval: 20
+
+display:
+  - id: 0
+    inputs:
+      HDMI: 17
+      DisplayPort: 15
+    gamer_modes:
+      Off: 0
+      FPS: 11
+      RTS: 12
+      Racing: 13
+      Gamer 1: 14
+      Gamer 2: 15
+      Gamer 3: 16
+  - id: 1
+    inputs:
+      HDMI: 17
+      DisplayPort: 15
+    gamer_modes:
+      Off: 0
+      FPS: 11
+      RTS: 12
+      Racing: 13
+      Gamer 1: 14
+      Gamer 2: 15
+      Gamer 3: 16

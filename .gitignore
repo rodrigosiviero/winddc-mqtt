@@ -1,61 +1,20 @@
-# Byte-compiled / optimized / DLL files
+# Local runtime and secrets
+config.yml
+.env
+.env.*
+!.env.example
+.hermes/
+
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Virtual environment
 .venv/
 venv/
-ENV/
-
-# Distribution / packaging
-.Python
-dist/
-build/
-egg-info/
-*.egg
-*.egg-info/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
 .pytest_cache/
-
-# mypy
 .mypy_cache/
-.dmypy.json
 
-# VS Code
+# Logs and local tooling
+*.log
 .vscode/
-
-# OS files
 .DS_Store
 Thumbs.db
-
-# Go build artifacts
-winddc-mqtt-go/
-*.exe
-*.test
-vendor/
