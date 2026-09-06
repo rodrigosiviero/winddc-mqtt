@@ -1,13 +1,14 @@
 mqtt:
+  host: "192.168.1.10"
+  port: 1883
   username: ""
   password: ""
-  host: "192.168.15.97"
-  port: 1883
 
+# Seconds between DDC/CI state reads.
 interval: 20
 
 display:
-  - id: 0  # First monitor
+  - id: 0
     inputs:
       HDMI: 17
       DisplayPort: 15
@@ -19,7 +20,7 @@ display:
       Gamer 1: 14
       Gamer 2: 15
       Gamer 3: 16
-  - id: 1  # Second monitor
+  - id: 1
     inputs:
       HDMI: 17
       DisplayPort: 15

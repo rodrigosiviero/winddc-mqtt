@@ -1,33 +1,49 @@
-# Windows DDC/CI to MQTT
+# winddc-mqtt
 
-Controls Windows-connected DDC/CI monitors through Home Assistant MQTT Discovery.
+Control Windows-connected DDC/CI monitors from Home Assistant through MQTT Discovery.
 
-## Setup
+[Architecture diagram](docs/runtime-architecture.html) · [Operations and troubleshooting](docs/OPERATIONS.md)
 
-```bat
+## Quick start
+
+Open **PowerShell as Administrator** in the repository:
+
+```powershell
 py -3.12 -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item config.example.yml config.yml
+# Edit config.yml: broker address and monitor VCP values.
 .venv\Scripts\python.exe start.py --check
 ```
 
-`--check` only enumerates monitors; it does not change input or gamer mode.
+`--check` must list the expected monitors before continuing. It only reads monitor identities; it never changes input or gamer mode.
 
-## Configuration
-
-`config.yml` defines broker settings and the exact DDC codes offered in Home Assistant. Keep credentials out of Git: use a local untracked config if authentication is later enabled.
-
-## Automatic startup
-
-DDC/CI must run in the interactive user session, not as a Windows Service. Install the logon task after validating `--check`:
+## Start automatically at logon
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\install-user-task.ps1
 ```
 
-Remove it with:
+This creates the `WinddcMqtt` scheduled task. It runs in your **interactive desktop session** using this repository's `.venv\Scripts\pythonw.exe`—not as a Windows Service. That distinction is required because DDC/CI monitor handles are unavailable to Session 0 services.
+
+Start it immediately instead of waiting for the next logon:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-user-task.ps1 -Remove
+schtasks /run /tn "WinddcMqtt"
+schtasks /query /tn "WinddcMqtt" /fo LIST /v
 ```
 
-Logs are written to `winddc.log`. The old `WinddcMqttService` and `\DDC` boot task are obsolete and should stay disabled/removed.
+## Manual run
+
+```bat
+run_winddc.bat
+```
+
+## Home Assistant entities
+
+Each configured display creates two MQTT Discovery `select` entities:
+
+- `select.display_<id>_input`
+- `select.display_<id>_gamer_mode`
+
+`config.yml` is intentionally ignored by Git. Keep broker credentials and local monitor VCP mappings there; commit changes to `config.example.yml` only.

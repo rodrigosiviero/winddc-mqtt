@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Arquitetura — Windows DDC/CI → MQTT</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1020; --panel:#141c33; --line:#334155; --text:#e5edf9; --muted:#9fb0ca; --blue:#3b82f6; --green:#10b981; --orange:#f59e0b; --red:#fb7185; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at 20% 0,#1b315d 0,transparent 34%),var(--bg); color:var(--text); font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    main { max-width:1200px; margin:auto; padding:40px 28px; }
+    h1 { margin:0; font-size:30px; letter-spacing:-.03em; }
+    p { color:var(--muted); margin:8px 0 28px; }
+    .card { border:1px solid var(--line); border-radius:16px; background:rgba(20,28,51,.88); padding:18px; box-shadow:0 20px 70px rgba(0,0,0,.24); }
+    svg { display:block; width:100%; height:auto; }
+    .node rect { stroke-width:1.5; rx:12; }
+    .node text.title { fill:var(--text); font-size:16px; font-weight:700; }
+    .node text.sub { fill:var(--muted); font-size:12px; }
+    .edge { stroke:#7d91b4; stroke-width:2; fill:none; marker-end:url(#arrow); }
+    .edge.green { stroke:var(--green); } .edge.blue { stroke:var(--blue); } .edge.orange { stroke:var(--orange); }
+    .label { fill:var(--muted); font-size:12px; text-anchor:middle; }
+    .note { margin-top:18px; display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .note div { padding:13px; border:1px solid var(--line); border-radius:10px; color:var(--muted); }
+    .note b { color:var(--text); display:block; margin-bottom:3px; }
+    @media (max-width:700px) { main { padding:22px 14px; } .note { grid-template-columns:1fr; } h1 { font-size:24px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Windows DDC/CI → MQTT</h1>
+    <p>Bridge persistente na sessão interativa do usuário — sem Windows Service / Session 0.</p>
+    <section class="card" aria-label="Diagrama da arquitetura de runtime">
+      <svg viewBox="0 0 1120 550" role="img" aria-labelledby="title desc">
+        <title id="title">Arquitetura do runtime winddc-mqtt</title>
+        <desc id="desc">Home Assistant comunica com o broker MQTT. A tarefa agendada no logon chama Pythonw da venv local para executar a bridge, que usa DXVA2 para controlar monitores DDC/CI.</desc>
+        <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7d91b4"/></marker></defs>
+        <path class="edge blue" d="M255 165 H345"/><path class="edge blue" d="M345 190 H255"/>
+        <text class="label" x="300" y="105">Discovery · state · command</text>
+        <path class="edge green" d="M560 165 H675"/><path class="edge green" d="M675 190 H560"/>
+        <text class="label" x="617" y="105">MQTT · LWT · reconnect</text>
+        <path class="edge orange" d="M820 240 V318"/>
+        <text class="label" x="870" y="284">DXVA2 / DDC-CI</text>
+        <path class="edge" d="M560 405 H675"/>
+        <text class="label" x="617" y="387">execução direta</text>
+        <path class="edge" d="M747 405 V318"/>
+        <text class="label" x="797" y="370">start.py</text>
+        <g class="node"><rect x="55" y="120" width="200" height="95" fill="#172554" stroke="#3b82f6"/><text class="title" x="155" y="158" text-anchor="middle">Home Assistant</text><text class="sub" x="155" y="182" text-anchor="middle">select entities</text></g>
+        <g class="node"><rect x="345" y="120" width="215" height="95" fill="#12333a" stroke="#10b981"/><text class="title" x="452" y="158" text-anchor="middle">MQTT Broker</text><text class="sub" x="452" y="182" text-anchor="middle">192.168.15.97:1883</text></g>
+        <g class="node"><rect x="675" y="120" width="245" height="120" fill="#172554" stroke="#3b82f6"/><text class="title" x="797" y="158" text-anchor="middle">winddc-mqtt</text><text class="sub" x="797" y="182" text-anchor="middle">paho-mqtt · polling</text><text class="sub" x="797" y="203" text-anchor="middle">Home Assistant Discovery</text></g>
+        <g class="node"><rect x="675" y="318" width="245" height="95" fill="#3b2813" stroke="#f59e0b"/><text class="title" x="797" y="356" text-anchor="middle">Monitores físicos</text><text class="sub" x="797" y="380" text-anchor="middle">DDC/CI habilitado</text></g>
+        <g class="node"><rect x="125" y="360" width="210" height="95" fill="#2b2039" stroke="#a78bfa"/><text class="title" x="230" y="398" text-anchor="middle">Task Scheduler</text><text class="sub" x="230" y="422" text-anchor="middle">AtLogOn · InteractiveToken</text></g>
+        <g class="node"><rect x="350" y="360" width="210" height="95" fill="#1c3149" stroke="#60a5fa"/><text class="title" x="455" y="398" text-anchor="middle">.venv\pythonw.exe</text><text class="sub" x="455" y="422" text-anchor="middle">dependências isoladas</text></g>
+        <path class="edge" d="M335 408 H350"/>
+        <text class="label" x="455" y="492">Sem Windows Service: Session 0 não possui os handles dos monitores da sessão do desktop.</text>
+      </svg>
+      <div class="note"><div><b>Início</b>O logon do usuário dispara a tarefa.</div><div><b>Execução</b>`pythonw.exe` local evita `cmd.exe`, PATH e ativação de venv.</div><div><b>Recuperação</b>O MQTT reconecta e a tarefa reinicia até três vezes após falha.</div></div>
+    </section>
+  </main>
+</body>
+</html>

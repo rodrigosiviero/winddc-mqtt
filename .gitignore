@@ -1,10 +1,20 @@
+# Local runtime and secrets
+config.yml
+.env
+.env.*
+!.env.example
+.hermes/
+
+# Python
 __pycache__/
 *.py[cod]
 .venv/
 venv/
-winddc.log
 .pytest_cache/
 .mypy_cache/
+
+# Logs and local tooling
+*.log
 .vscode/
 .DS_Store
 Thumbs.db
