@@ -1,12 +1,33 @@
-#  DDC to MQTT
+# Windows DDC/CI to MQTT
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/rodrigosivf)
+Controls Windows-connected DDC/CI monitors through Home Assistant MQTT Discovery.
 
-This repo aims to integrate the ddc to mqtt but for windows.
+## Setup
 
-This was heavy inspired and copied from @moimart check this version: https://github.com/moimart/ddc-mqtt.
+```bat
+py -3.12 -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe start.py --check
+```
 
-There was some differences like select instead of switches and added VCP for the gamer mode of my AOC monitor.
+`--check` only enumerates monitors; it does not change input or gamer mode.
 
+## Configuration
 
-![HomeAssistant Entities](https://github.com/rodrigosiviero/winddc-mqtt/blob/main/ha.png?raw=true)
+`config.yml` defines broker settings and the exact DDC codes offered in Home Assistant. Keep credentials out of Git: use a local untracked config if authentication is later enabled.
+
+## Automatic startup
+
+DDC/CI must run in the interactive user session, not as a Windows Service. Install the logon task after validating `--check`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-user-task.ps1
+```
+
+Remove it with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-user-task.ps1 -Remove
+```
+
+Logs are written to `winddc.log`. The old `WinddcMqttService` and `\DDC` boot task are obsolete and should stay disabled/removed.
