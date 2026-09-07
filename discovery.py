@@ -14,6 +14,7 @@ def entities(display: DisplayConfig, node_id: str) -> list[tuple[str, dict]]:
     result = [
         _entity(base + "_input", "Input Source", list(display.inputs), device),
         _entity(base + "_gamer_mode", "Gamer Mode", list(display.gamer_modes), device),
+        _switch(f"homeassistant/switch/display_{display.id}_power", "Power", device),
     ]
     if display.color_presets:
         result.append(_entity(base + "_color_preset", "Color Preset", list(display.color_presets), device))
@@ -31,5 +32,23 @@ def _entity(base: str, name: str, options: list[str], device: dict) -> tuple[str
         "payload_available": "online",
         "payload_not_available": "offline",
         "options": options,
+        "device": device,
+    }
+
+
+def _switch(base: str, name: str, device: dict) -> tuple[str, dict]:
+    return base + "/config", {
+        "name": name,
+        "unique_id": base.replace("homeassistant/switch/", ""),
+        "object_id": base.rsplit("/", 1)[-1],
+        "command_topic": base + "/command",
+        "state_topic": base + "/state",
+        "payload_on": "ON",
+        "payload_off": "OFF",
+        "state_on": "ON",
+        "state_off": "OFF",
+        "availability_topic": "winddc-mqtt/availability",
+        "payload_available": "online",
+        "payload_not_available": "offline",
         "device": device,
     }

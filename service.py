@@ -4,7 +4,7 @@ import logging
 import time
 
 from config import AppConfig, DisplayConfig
-from ddc import COLOR_PRESET_CODE, GAMER_MODE_CODE, INPUT_SOURCE_CODE, get_vcp_feature, physical_monitors, set_vcp_feature
+from ddc import COLOR_PRESET_CODE, GAMER_MODE_CODE, INPUT_SOURCE_CODE, POWER_MODE_CODE, get_vcp_feature, physical_monitors, set_vcp_feature
 from discovery import entities
 from mqtt_client import MQTTClient
 
@@ -48,6 +48,7 @@ class Controller:
                 self._publish_state(display, "gamer_mode", get_vcp_feature(handle, GAMER_MODE_CODE), display.gamer_modes)
                 if display.color_presets:
                     self._publish_state(display, "color_preset", get_vcp_feature(handle, COLOR_PRESET_CODE), display.color_presets)
+                self._publish_power_state(display, get_vcp_feature(handle, POWER_MODE_CODE))
 
     def _publish_state(self, display: DisplayConfig, kind: str, value: int | None, choices: dict[str, int]) -> None:
         if value is None:
@@ -56,8 +57,29 @@ class Controller:
         name = next((name for name, code in choices.items() if code == value), "Unknown")
         self.mqtt.publish(f"homeassistant/select/display_{display.id}_{kind}/state", name)
 
+    def _publish_power_state(self, display: DisplayConfig, value: int | None) -> None:
+        if value is None:
+            logging.warning("DDC read failed for display %s power", display.id)
+            return
+        self.mqtt.publish(f"homeassistant/switch/display_{display.id}_power/state", "ON" if value == 1 else "OFF")
+
     def _command(self, topic: str, payload: str) -> None:
         for display in self.config.displays:
+            if topic == f"homeassistant/switch/display_{display.id}_power/command":
+                value = {"ON": 1, "OFF": 2}.get(payload)
+                if value is None:
+                    logging.warning("Rejected invalid power command %r for display %s", payload, display.id)
+                    return
+                with physical_monitors() as monitors:
+                    if display.id >= len(monitors):
+                        logging.warning("Configured display %s is unavailable", display.id)
+                        return
+                    if not set_vcp_feature(monitors[display.id][0], POWER_MODE_CODE, value):
+                        logging.warning("DDC power command failed for display %s", display.id)
+                        return
+                time.sleep(2)
+                self.poll()
+                return
             prefix = f"homeassistant/select/display_{display.id}_"
             if not topic.startswith(prefix):
                 continue
