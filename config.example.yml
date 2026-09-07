@@ -20,6 +20,12 @@ display:
       Gamer 1: 14
       Gamer 2: 15
       Gamer 3: 16
+    color_presets:
+      sRGB: 1
+      Warm: 5
+      Normal: 6
+      Cool: 8
+      User: 11
   - id: 1
     inputs:
       HDMI: 17
@@ -32,3 +38,9 @@ display:
       Gamer 1: 14
       Gamer 2: 15
       Gamer 3: 16
+    color_presets:
+      sRGB: 1
+      Warm: 5
+      Normal: 6
+      Cool: 8
+      User: 11

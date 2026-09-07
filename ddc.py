@@ -8,6 +8,7 @@ from typing import Iterator
 _MONITORENUMPROC = WINFUNCTYPE(BOOL, HMONITOR, HDC, POINTER(RECT), LPARAM)
 INPUT_SOURCE_CODE = 0x60
 GAMER_MODE_CODE = 0xDC
+COLOR_PRESET_CODE = 0x14
 
 
 class _PhysicalMonitor(Structure):

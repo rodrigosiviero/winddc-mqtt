@@ -4,7 +4,7 @@ import logging
 import time
 
 from config import AppConfig, DisplayConfig
-from ddc import GAMER_MODE_CODE, INPUT_SOURCE_CODE, get_vcp_feature, physical_monitors, set_vcp_feature
+from ddc import COLOR_PRESET_CODE, GAMER_MODE_CODE, INPUT_SOURCE_CODE, get_vcp_feature, physical_monitors, set_vcp_feature
 from discovery import entities
 from mqtt_client import MQTTClient
 
@@ -46,6 +46,8 @@ class Controller:
                 handle, _description = monitors[display.id]
                 self._publish_state(display, "input", get_vcp_feature(handle, INPUT_SOURCE_CODE), display.inputs)
                 self._publish_state(display, "gamer_mode", get_vcp_feature(handle, GAMER_MODE_CODE), display.gamer_modes)
+                if display.color_presets:
+                    self._publish_state(display, "color_preset", get_vcp_feature(handle, COLOR_PRESET_CODE), display.color_presets)
 
     def _publish_state(self, display: DisplayConfig, kind: str, value: int | None, choices: dict[str, int]) -> None:
         if value is None:
@@ -59,8 +61,15 @@ class Controller:
             prefix = f"homeassistant/select/display_{display.id}_"
             if not topic.startswith(prefix):
                 continue
-            kind = "input" if topic == prefix + "input/command" else "gamer_mode"
-            choices = display.inputs if kind == "input" else display.gamer_modes
+            settings = {
+                "input": (INPUT_SOURCE_CODE, display.inputs),
+                "gamer_mode": (GAMER_MODE_CODE, display.gamer_modes),
+                "color_preset": (COLOR_PRESET_CODE, display.color_presets),
+            }
+            kind = next((name for name in settings if topic == prefix + name + "/command"), None)
+            if kind is None:
+                continue
+            code, choices = settings[kind]
             value = choices.get(payload)
             if value is None:
                 logging.warning("Rejected invalid %s command %r for display %s", kind, payload, display.id)
@@ -69,6 +78,6 @@ class Controller:
                 if display.id >= len(monitors):
                     logging.warning("Configured display %s is unavailable", display.id)
                     return
-                set_vcp_feature(monitors[display.id][0], INPUT_SOURCE_CODE if kind == "input" else GAMER_MODE_CODE, value)
+                set_vcp_feature(monitors[display.id][0], code, value)
             self.poll()
             return

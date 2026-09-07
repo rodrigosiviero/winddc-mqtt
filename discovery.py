@@ -11,10 +11,13 @@ def entities(display: DisplayConfig, node_id: str) -> list[tuple[str, dict]]:
         "manufacturer": "AOC",
         "model": "DDC/CI monitor",
     }
-    return [
+    result = [
         _entity(base + "_input", "Input Source", list(display.inputs), device),
         _entity(base + "_gamer_mode", "Gamer Mode", list(display.gamer_modes), device),
     ]
+    if display.color_presets:
+        result.append(_entity(base + "_color_preset", "Color Preset", list(display.color_presets), device))
+    return result
 
 
 def _entity(base: str, name: str, options: list[str], device: dict) -> tuple[str, dict]:
