@@ -20,6 +20,7 @@ class DisplayConfig:
     name: str
     inputs: dict[str, int]
     gamer_modes: dict[str, int]
+    color_presets: dict[str, int]
 
 
 @dataclass(frozen=True)
@@ -42,6 +43,7 @@ def load_config(path: Path) -> AppConfig:
             name=str(item.get("name") or f"Display {item['id']}"),
             inputs={str(name): int(code) for name, code in (item.get("inputs") or {}).items()},
             gamer_modes={_yaml_label(name): int(code) for name, code in (item.get("gamer_modes") or {}).items()},
+            color_presets={str(name): int(code) for name, code in (item.get("color_presets") or {}).items()},
         )
         for item in raw.get("display") or ()
     )
